@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+<!-- Hotel management room configuration   -->
+    <record id="hotel_management_tree" model="ir.ui.view">
+        <field name="name">hotel_management.tree</field>
+        <field name="model">hotel.management</field>
+        <field name="arch" type="xml">
+            <tree string="Channel">
+                <field name="room_number"/>
+                <field name="bed"/>
+                <field name="currency_id" invisible="1"/>
+                <field name="rent"/>
+                <field name="facility_ids" widget="many2many_tags"/>
+                <field name = "state"/>
+            </tree>
+        </field>
+    </record>
+<!--    Hotel Management form view-->
+     <record id="hotel_management_form_view" model="ir.ui.view">
+        <field name="name">hotel_management.form</field>
+        <field name="model">hotel.management</field>
+        <field name="arch" type="xml">
+            <form string="hotel_management_form">
+            <sheet>
+                <group>
+                    <group>
+                        <field name="room_number"/>
+                        <field name="bed"/>
+                        <field name="available_beds" attrs="{'invisible': [('bed','!=', 'dormitory')] }"/>
+                    </group>
+                    <group>
+                        <field name="facility_ids" widget="many2many_tags"/>
+                        <field name="currency_id" invisible="1"/>
+                        <field name="rent"/>
+                    </group>
+                </group>
+            </sheet>
+           </form>
+        </field>
+     </record>
+    <record id="hotel_management_search" model="ir.ui.view">
+        <field name="name">hotel_management_search</field>
+        <field name="model">hotel.management</field>
+        <field name="arch" type="xml">
+            <search string="Tests">
+                <filter string="Available Room" name="state" domain="[('state', '!=', 'check_in')]"/>
+            </search>
+        </field>
+    </record>
+<!--    Hotel Management action-->
+     <record id="hotel_management_action" model="ir.actions.act_window">
+        <field name="name">Rooms</field>
+        <field name="res_model">hotel.management</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>

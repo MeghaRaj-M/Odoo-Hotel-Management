@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+<!-- Hotel food items configuration   -->
+    <record id="hotel_food_items_tree" model="ir.ui.view">
+        <field name="name">hotel_food_items.tree</field>
+        <field name="model">hotel.food.items</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="food_name"/>
+                <field name="category_id"/>
+            </tree>
+        </field>
+    </record>
+<!--    Hotel food items form view-->
+     <record id="hotel_food_items_form_view" model="ir.ui.view">
+        <field name="name">hotel_food_items.form</field>
+        <field name="model">hotel.food.items</field>
+        <field name="arch" type="xml">
+            <form string="order_food">
+                <sheet>
+                    <group>
+                        <field name="order_record_id"/>
+                         <field name="food_name"/>
+                        <field name="category_id"/>
+                        <field name="food_price"/>
+                        <field name="food_image"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+     </record>
+<!--    Hotel food items action-->
+     <record id="hotel_food_items_action" model="ir.actions.act_window">
+        <field name="name">Food Items</field>
+        <field name="res_model">hotel.food.items</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+<!--    Hotel food category action-->
+     <record id="hotel_food_category_action" model="ir.actions.act_window">
+        <field name="name">Food Category</field>
+        <field name="res_model">food.category</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>

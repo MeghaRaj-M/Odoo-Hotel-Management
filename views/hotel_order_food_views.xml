@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<odoo>
+<!--    Hotel order food form view-->
+    <record id="hotel_order_food_form_view" model="ir.ui.view">
+        <field name="name">hotel_order_food.form</field>
+        <field name="model">order.food</field>
+        <field name="arch" type="xml">
+            <form string="order_food">
+              <sheet>
+                  <group>
+                      <field name="room_id" options="{'no_create_edit': True, 'no_create': True}"/>
+                      <field name="partner_id" widget="res_partner_many2one"/>
+                      <field name="order_time"/>
+                  </group>
+                  <notebook>
+                      <page string="Menu">
+                          <group>
+                              <field name="category_ids" widget="many2many_tags"/>
+                              <field name="food_item_ids" mode="kanban" context="{'default_order_record_id' : active_id}"/>
+                          </group>
+                      </page>
+                      <page string="Order List">
+                            <field name="order_line_ids">
+                                    <tree editable="bottom">
+                                        <field name="food_name"/>
+                                        <field name="description"/>
+                                        <field name="food_qty"/>
+                                        <field name="food_price"/>
+                                        <field name="sub_total" sum="Total"/>
+                                        <field name="list_id" invisible="1"/>
+                                    </tree>
+                            </field>
+                      </page>
+                  </notebook>
+              </sheet>
+            </form>
+        </field>
+    </record>
+    <!--    Hotel food items kanban view-->
+    <record id="food_items_kanban_view" model="ir.ui.view">
+            <field name="name">food.items.kanban</field>
+            <field name="model">hotel.food.items</field>
+            <field name="arch" type="xml">
+                <kanban action="action_order_food" type="object">
+                    <field name="order_record_id"/>
+                <field name="food_name"/>
+                <field name="category_id"/>
+                <field name="food_price"/>
+                <field name="food_image" widget="image" />
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_global_click o_kanban_record_has_image_fill">
+                            <field name="food_image" class="o_lunch_image o_kanban_image_fill_left"
+                                   options="{'placeholder': '/lunch/static/img/lunch.png', 'size': [94, 94]}" widget="image"/>
+                            <div class="oe_kanban_details">
+                                <strong class="o_kanban_record_title">
+                                        <field name="food_name"/>
+                                </strong>
+                                 <div class="o_kanban_tags_section"/>
+                                    <ul>
+                                        <li>
+                                            <field name="category_id"/>
+                                        </li>
+                                        <li>
+                                            <field name="food_price"/>
+                                        </li><li>
+                                            <field name="order_record_id"/>
+                                        </li>
+                                    </ul>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+            </field>
+    </record>
+    <!-- hotel order food item wizard view-->
+    <record model="ir.ui.view" id="hotel_food_items_wizard_form_view">
+    <field name="name">hotel_food_items.wizard</field>
+    <field name="model">hotel.food.items.wizard</field>
+    <field name="arch" type="xml">
+        <form string="order food wizard">
+            <sheet>
+                <group>
+                    <group>
+                        <field name="order_record_id"/>
+                        <field name="food_name"/>
+                        <field name="category_id"/>
+                        <field name="food_price"/>
+                        <field name="food_qty"/>
+                    </group>
+                    <group>
+                        <field name="food_image"  widget="image"/>
+                    </group>
+                </group>
+            </sheet>
+            <footer>
+                 <button type="object" name="add_food_item" string="Add To list"/>
+            </footer>
+        </form>
+    </field>
+    </record>
+    <!--  Hotel order food action-->
+     <record  id="hotel_order_food_action" model="ir.actions.act_window">
+        <field name="name">Order Food</field>
+        <field name="res_model">order.food</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>

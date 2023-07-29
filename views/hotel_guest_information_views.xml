@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+<!-- Hotel reception guest information  -->
+    <record id="hotel_guest_information_tree" model="ir.ui.view">
+        <field name="name">hotel_guest_information.tree</field>
+        <field name="model">guest.information</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom">
+                <field name="name"/>
+                <field name="gender"/>
+                <field name="age"/>
+            </tree>
+        </field>
+    </record>
+</odoo>
