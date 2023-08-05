@@ -1,8 +1,9 @@
 {
         'name': 'Hotel Management',
         'version': '16.0.1.0',
-        'depends': ['base', 'mail'],
+        'depends': ['base', 'mail','account'],
         'data': [
+                'security/security_groups.xml',
                 'security/ir.model.access.csv',
                 'views/hotel_management_views.xml',
                 'views/hotel_reception_views.xml',

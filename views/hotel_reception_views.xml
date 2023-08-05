@@ -34,9 +34,15 @@
                             options="{'clickable':'1'}"/>
                 </header>
             <sheet>
+                <div class="oe_button_box" name="button_box">
+                    <button name="action_view_invoice" type="object" class="oe_stat_button"
+                            icon="fa-pencil-square-o" string="invoice" attrs="{'invisible': [('payment_status', '=', False)]}">
+                    </button>
+                </div>
                 <h2>
                      <field name="reference_no" string="Sequence"/>
                 </h2>
+                <widget name="web_ribbon" title="Paid" bg_color="bg-success" attrs="{'invisible' :[('payment_status','=',False)]}"/>
                 <group>
                     <group>
                            <field name="partner_id" widget="res_partner_many2one" context="{'show_address':'1'}" options="{'always_reload' : 'true'}"/>
@@ -50,6 +56,7 @@
                             <field name="expected_days" attrs="{'invisible': [('state', 'in', ['check_out', 'cancel'])]}"/>
                             <field name="expected_date" attrs="{'invisible': [('state', 'in', ['check_out', 'cancel'])]}"/>
                             <field name="check_out_date"/>
+                           <field name="payment_status" invisible="1"/>
                     </group>
                 </group>
                 <notebook>
@@ -58,12 +65,14 @@
                     </page>
                     <page string="Payment">
                         <field name="list_ids">
-                             <tree editable="bottom">
-                                        <field name="food_name"/>
+                             <tree editable="bottom" create="0">
+                                        <field name="food_name_id"/>
                                         <field name="description"/>
                                         <field name="food_qty"/>
-                                        <field name="food_price"/>
-                                        <field name="sub_total" sum="Total"/>
+                                        <field name="uom_id"/>
+                                        <field name="currency_id" invisible="1"/>
+                                        <field name="food_price" widget="monetary" options="{'currency_field':'currency_id'}"/>
+                                        <field name="sub_total" sum="Total" widget="monetary" options="{'currency_field':'currency_id'}"/>
                                         <field name="list_id" invisible="1"/>
                              </tree>
                         </field>

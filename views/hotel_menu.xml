@@ -11,7 +11,7 @@
         <menuitem id="Order_Food" name="Order Food">
             <menuitem id="hotel_order_food_menu" action="hotel_order_food_action"/>
             <menuitem id="hotel_food_items_menu" action="hotel_food_items_action"/>
-            <menuitem id="hotel_food_category_menu" action="hotel_food_category_action"/>
+<!--            <menuitem id="hotel_food_category_menu" action="hotel_food_category_action"/>-->
         </menuitem>
     </menuitem>
 </odoo>

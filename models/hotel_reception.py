@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
-from odoo import api, fields, models, _, exceptions
+from odoo import api, fields, models, _, exceptions, Command
 
 
 class HotelReception(models.Model):
@@ -21,7 +21,7 @@ class HotelReception(models.Model):
                                readonly="True",
                                help="Check in time of guest")
     check_out_date = fields.Datetime(string="Check Out",
-                                     compute="_onchange_state_check_out",
+                                     compute="_compute_check_out_date",
                                      store=True,
                                      help="check out date and time of guest")
     bed_type = fields.Selection([('single', 'single'), ('double', 'Double'),
@@ -46,12 +46,12 @@ class HotelReception(models.Model):
     name_ids = fields.One2many("guest.information", "guest_id",
                                string="Guest information",
                                help="To get all guest details in the room")
-    total_guest = fields.Integer(compute="_count_guest",
-                                 help="Total no: of guest information ")
     is_today = fields.Date(default=fields.Date.today(), string="Current date",
                            help="To get the current date")
-    is_checked = fields.Boolean(default=True, compute='_check_date')
-    list_ids = fields.One2many("hotel.food.order.list","list_id")
+    is_checked = fields.Boolean(default=True, compute='_compute_is_checked')
+    list_ids = fields.One2many("hotel.food.order.list", "add_id")
+    invoice_id = fields.Many2one("account.move")
+    payment_status = fields.Boolean(default=False, compute='_compute_payment_status')
 
     @api.model
     def create(self, vals):
@@ -66,16 +66,11 @@ class HotelReception(models.Model):
         res = super(HotelReception, self).create(vals)
         return res
 
-    @api.depends('name_ids')
-    def _count_guest(self):
-        """ Count total guest accommodating in a room """
-        self.total_guest = len(self.name_ids)
-
     def mark_as_check_in(self):
         """  To mark accommodation status as check_in
         from draft on clicking button"""
         for record in self:
-            if record.total_guest == record.number_of_guest:
+            if record.number_of_guest == len(self.name_ids):
                 record.state = 'check_in'
                 record.room_id.state = 'check_in'
             else:
@@ -91,10 +86,51 @@ class HotelReception(models.Model):
     def mark_as_check_out(self):
         """  To mark accommodation status as check_out
          from check in on clicking button"""
-        for record in self:
-            record.state = 'check_out'
-            record.room_id.state = 'check_out'
-        return True
+        self.state = 'check_out'
+        self.room_id.state = 'check_out'
+        self.update({
+            "list_ids": [(fields.Command.create({
+                "description": "Rent",
+                "food_qty": (datetime.today() - self.check_in).days if
+                (datetime.today() - self.check_in).days > 1 else 1,
+                "food_price": self.room_id.rent,
+                "sub_total": self.room_id.rent * ((datetime.today() - self.check_in).days
+                                                  if (datetime.today() -
+                                                      self.check_in).days > 1 else 1)
+            }))]
+        })
+        invoice_lines = []
+        for rec in self.list_ids:
+            invoice_lines.append((Command.create({
+                'name': rec.food_name_id.food_name if rec.food_name_id else "Rent",
+                'quantity': rec.food_qty,
+                'price_unit': rec.food_price,
+                'price_subtotal': rec.sub_total,
+            })))
+        invoice = self.env['account.move'].create([{
+            'move_type': 'out_invoice',
+            'partner_id': self.partner_id.id,
+            'invoice_line_ids': invoice_lines,
+            'invoice_origin': self.reference_no
+        }])
+        invoice.action_post()
+        self.invoice_id = invoice.id
+        print(self.invoice_id)
+        return {
+            'name': 'invoice',
+            'view_mode': 'form',
+            'res_id': invoice.id,
+            'res_model': 'account.move',
+            'type': 'ir.actions.act_window',
+        }
+
+    @api.depends('invoice_id.payment_state')
+    def _compute_payment_status(self):
+        for rec in self:
+            if rec.invoice_id.payment_state == 'paid':
+                rec.payment_status = True
+            else:
+                rec.payment_status = False
 
     @api.depends("expected_days")
     def _computation_expected_date(self):
@@ -103,16 +139,12 @@ class HotelReception(models.Model):
         for record in self:
             record.expected_date = record.check_in + \
                                    relativedelta(days=record.expected_days)
-            print(self.expected_date)
 
     @api.depends("state")
-    def _onchange_state_check_out(self):
+    def _compute_check_out_date(self):
         """ Calculate check out date on state change"""
-        if self.state == 'check_out':
-            self.check_out_date = datetime.today()
-        else:
-            self.check_out_date = False
-        return
+        for rec in self:
+            rec.check_out_date = datetime.today() if rec.state == 'check_out' else False
 
     @api.onchange("bed_type", "facilities_ids", "number_of_guest")
     def _bed_type_filter(self):
@@ -136,10 +168,17 @@ class HotelReception(models.Model):
                 domain.append(('facility_ids', '=', facility_id))
         return {'domain': {'room_id': domain}}
 
-    def _check_date(self):
+    def _compute_is_checked(self):
         """ To check the expected date of check out and current date matches"""
         for record in self:
-            if record.is_today == record.expected_date:
-                record.is_checked = True
-            else:
-                record.is_checked = False
+            record.is_checked = True if record.is_today == record.expected_date else False
+
+    def action_view_invoice(self):
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Invoice',
+            'view_mode': 'tree,form',
+            'res_model': 'account.move',
+            'domain': [('invoice_origin', '=', self.reference_no)],
+            'context': "{'create':False}"
+        }

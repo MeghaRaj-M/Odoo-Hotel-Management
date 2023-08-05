@@ -41,5 +41,3 @@ class OrderFood(models.Model):
             self.food_item_ids = domain
 
     order_line_ids = fields.One2many("hotel.food.order.list", "list_id")
-
-

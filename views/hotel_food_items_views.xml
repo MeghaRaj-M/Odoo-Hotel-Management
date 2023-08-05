@@ -19,10 +19,10 @@
             <form string="order_food">
                 <sheet>
                     <group>
-                        <field name="order_record_id"/>
                          <field name="food_name"/>
                         <field name="category_id"/>
-                        <field name="food_price"/>
+                        <field name="currency_id" invisible="1"/>
+                        <field name="food_price" widget="monetary" options="{'currency_field':'currency_id'}"/>
                         <field name="food_image"/>
                     </group>
                 </sheet>
